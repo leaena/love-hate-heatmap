@@ -1,5 +1,5 @@
 var width = 600; // youtubeWidth
-var height = 75;
+var height = 25;
 var numSeconds = 248; //youtubeSeconds
 var secondWidth = width/numSeconds;
 

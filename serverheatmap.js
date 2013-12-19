@@ -1,5 +1,5 @@
 var width = 600; // Youtube Player width
-var height = 75;
+var height = 25;
 var numSeconds = 248; //Youtube video length in seconds
 var secondWidth = width/numSeconds;
 
@@ -24,14 +24,9 @@ d3.json('/api/votes',
         .data(data)
         .enter().append("rect")
         .attr("x", function(d) { return (d.second-1) * secondWidth; })
-        .attr("y", function(d) { return 0; })
-        .attr("rx", 0)
-        .attr("ry", 0)
         .attr("width", secondWidth)
         .attr("height", height);
 
     heatMap.transition().duration(1000)
         .style("fill", function(d) { return colorScale(d.value); });
-
-    heatMap.append("title").text(function(d) { return d.value; });
 });
