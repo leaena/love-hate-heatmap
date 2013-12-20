@@ -2,13 +2,19 @@ var width = 600; // Youtube Player width
 var height = 25;
 var numSeconds = 248; //Youtube video length in seconds
 var secondWidth = width/numSeconds;
+var videoID = '1';  //Youtube video id requested
 
-d3.json('/api/votes',
-  function(d) {
-    return {
-      second: +d.timestamp,
-      value: +d.vote
-    };
+d3.json('/votes/'+ videoID, //get request address from the server
+  function(json) {
+    return d3.nest()
+      .key(function(d) { return d.timestamp; })
+      .sortKeys(d3.ascending)
+      .rollup(function(d){ 
+        return {vote: d3.mean(d, function(g){ 
+          return +g.vote;
+        })};
+      })
+      .entries(json);
   },
   function(error, data) {
     var colorScale = d3.scale.linear()
