@@ -1,37 +1,41 @@
-var width = 600; // youtubeWidth
+var width = 600;
 var height = 25;
-var numSeconds = 248; //youtubeSeconds
+var numSeconds = 100;
 var secondWidth = width/numSeconds;
 
-d3.tsv("votes.tsv",
-  function(d) {
-    return {
-      second: +d.timestamp,
-      value: +d.vote
-    };
-  },
-  function(error, data) {
-    var colorScale = d3.scale.linear()
-        .domain([-1, 0, 1])
-        .range(["red", "grey", "green"]);
+d3.tsv('votes.tsv', function(votes) {
+  var total = d3.nest()
+    .rollup(function(d){
+      return d.length;
+    })
+    .entries(votes);
 
-    var svg = d3.select("#chart").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
+  var data = d3.nest()
+    .key(function(d) { return d.timestamp; })
+    .sortKeys(d3.ascending)
+    .rollup(function(d){
+      return (d3.mean(d,function(g) { return +g.vote;}) * ((d.length/total) * 10));
+    })
+    .entries(votes);
 
-    var heatMap = svg.selectAll(".second")
-        .data(data)
-        .enter().append("rect")
-        .attr("x", function(d) { return (d.second-1) * secondWidth; })
-        .attr("y", function(d) { return 0; })
-        .attr("rx", 0)
-        .attr("ry", 0)
-        .attr("width", secondWidth)
-        .attr("height", height);
+  var colorScale = d3.scale.linear()
+      .domain([-1, 0, 1])
+      .range(["red", "purple", "blue"]);
 
-    heatMap.transition().duration(1000)
-        .style("fill", function(d) { return colorScale(d.value); });
+  var svg = d3.select("#chart").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .append("g");
 
-    heatMap.append("title").text(function(d) { return d.value; });
+  var heatMap = svg.selectAll(".second")
+    .data(data)
+    .enter().append("rect")
+    .attr("x", function(d) { return (+d.key-1) * secondWidth; })
+    .attr("y", 0)
+    .attr("width", secondWidth+1)
+    .attr("height", height);
+
+  heatMap.style("fill", function(d) {
+    return colorScale(d.values);
+  });
 });
